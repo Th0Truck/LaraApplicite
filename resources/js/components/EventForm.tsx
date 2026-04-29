@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Calendar, Clock } from 'lucide-react';
 import { fetchJson } from '@/lib/utils';
+import { store, update } from '@/routes/events';
 
 interface EventFormEvent {
   id?: number;
@@ -79,9 +80,7 @@ export default function EventForm({ event, onClose, onSave }: EventFormProps) {
     setErrorMessage(null);
 
     try {
-      const endpoint = event?.id ? `/events/${event.id}` : '/events';
-      const method = event?.id ? 'PUT' : 'POST';
-
+      const route = event?.id ? update(event.id) : store();
       const { start_time, end_time, ...rest } = formData;
       const payload = {
         ...rest,
@@ -89,8 +88,8 @@ export default function EventForm({ event, onClose, onSave }: EventFormProps) {
         end_date: buildDateTime(formData.end_date, end_time ?? '00:00'),
       };
 
-      const savedEvent = await fetchJson(endpoint, {
-        method,
+      const savedEvent = await fetchJson(route.url, {
+        method: route.method,
         body: payload,
       });
       onSave(savedEvent);
