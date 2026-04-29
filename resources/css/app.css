@@ -204,4 +204,21 @@
     .rbc-toolbar + div {
         @apply border border-gray-200 rounded-lg overflow-hidden;
     }
+
+    .event-form input,
+    .event-form textarea {  
+        @apply w-full border border-gray-300 rounded px-3 py-2 focus:outline text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+    }
+
+    .event-form select option {
+        @apply bg-white text-gray-900;
+    }
+
+    .event-form input[type="date"], .event-form input[type="time"] {
+        @apply text-sm text-gray-900;
+    }
+
+    .event-form hr {
+        @apply my-4 border-gray-200;
+    }
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Check, Clock, XCircle } from 'lucide-react';
+import { fetchJson } from '@/lib/utils';
 
 interface Attendee {
   id: number;
@@ -34,16 +35,10 @@ export default function AttendeeRSVP({
   const handleStatusChange = async (attendeeId: number, newStatus: 'attending' | 'maybe' | 'declined') => {
     setLoading(attendeeId);
     try {
-      const response = await fetch(`/event-attendees/${attendeeId}`, {
+      await fetchJson(`/event-attendees/${attendeeId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-        },
-        body: JSON.stringify({ status: newStatus }),
+        body: { status: newStatus },
       });
-
-      if (!response.ok) throw new Error('Failed to update RSVP');
       onStatusChange(attendeeId, newStatus);
     } catch (error) {
       console.error('Error updating RSVP:', error);

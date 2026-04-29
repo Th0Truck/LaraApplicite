@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Edit2, Trash2, MapPin, Clock, UserPlus, Download } from 'lucide-react';
 import { format } from 'date-fns';
+import { fetchJson } from '@/lib/utils';
 import InviteAttendees from '@/components/InviteAttendees';
 import AttendeeRSVP from '@/components/AttendeeRSVP';
 
@@ -50,8 +51,7 @@ export default function EventDetail({ event, onClose, onUpdate, onDelete }: Even
 
   const fetchCurrentUser = async () => {
     try {
-      const response = await fetch('/api/user');
-      const user = await response.json();
+      const user = await fetchJson('/api/user');
       setCurrentUserId(user.id);
     } catch {
       console.error('Failed to fetch current user');
@@ -60,8 +60,7 @@ export default function EventDetail({ event, onClose, onUpdate, onDelete }: Even
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('/users');
-      const users = await response.json();
+      const users = await fetchJson('/users');
       setAllUsers(users);
     } catch (error) {
       console.error('Failed to fetch users:', error);
@@ -73,15 +72,9 @@ export default function EventDetail({ event, onClose, onUpdate, onDelete }: Even
 
     setIsDeleting(true);
     try {
-      const response = await fetch(`/events/${event.id}`, {
+      await fetchJson(`/events/${event.id}`, {
         method: 'DELETE',
-        headers: {
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-        },
       });
-
-      if (!response.ok) throw new Error('Failed to delete event');
-
       onDelete(event.id);
     } catch (error) {
       console.error('Error deleting event:', error);

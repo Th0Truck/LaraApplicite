@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { qrCode, recoveryCodes, secretKey } from '@/routes/two-factor';
 import type { TwoFactorSecretKey, TwoFactorSetupData } from '@/types';
+import { fetchJson } from '@/lib/utils';
 
 export type UseTwoFactorAuthReturn = {
     qrCodeSvg: string | null;
@@ -17,18 +18,6 @@ export type UseTwoFactorAuthReturn = {
 };
 
 export const OTP_MAX_LENGTH = 6;
-
-const fetchJson = async <T>(url: string): Promise<T> => {
-    const response = await fetch(url, {
-        headers: { Accept: 'application/json' },
-    });
-
-    if (!response.ok) {
-        throw new Error(`Failed to fetch: ${response.status}`);
-    }
-
-    return response.json();
-};
 
 export const useTwoFactorAuth = (): UseTwoFactorAuthReturn => {
     const [qrCodeSvg, setQrCodeSvg] = useState<string | null>(null);

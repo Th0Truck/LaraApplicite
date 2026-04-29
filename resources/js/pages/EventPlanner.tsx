@@ -1,8 +1,9 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
-import enUS from 'date-fns/locale/en-US';
+import { enUS } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { fetchJson } from '@/lib/utils';
 import EventForm from '@/components/EventForm';
 import EventDetail from '@/components/EventDetail';
 import SearchFilter from '@/components/SearchFilter';
@@ -22,12 +23,15 @@ const localizer = dateFnsLocalizer({
 interface CalendarEvent {
   id: number;
   title: string;
+  start_date: string;
+  end_date: string;
   start: Date;
   end: Date;
   description?: string;
   location?: string;
   category?: string;
   user_id: number;
+  user?: any;
   is_recurring?: boolean;
   recurrence_pattern?: string;
   attendees?: any[];
@@ -37,6 +41,8 @@ export default function EventPlanner() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [currentView, setCurrentView] = useState<'month' | 'week' | 'day' | 'agenda'>('month');
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -64,8 +70,7 @@ export default function EventPlanner() {
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch('/events');
-      const data = await response.json();
+      const data = await fetchJson('/events');
       const formattedEvents = data.map((event: any) => ({
         ...event,
         start: new Date(event.start_date),
@@ -89,17 +94,19 @@ export default function EventPlanner() {
     setShowForm(false);
   };
 
-  const handleEventCreated = (newEvent: CalendarEvent) => {
-    newEvent.start = new Date(newEvent.start);
-    newEvent.end = new Date(newEvent.end);
-    setEvents([...events, newEvent]);
+  const normalizeEvent = (event: any): CalendarEvent => ({
+    ...event,
+    start: event.start ? new Date(event.start) : new Date(event.start_date),
+    end: event.end ? new Date(event.end) : new Date(event.end_date),
+  });
+
+  const handleEventCreated = (newEvent: any) => {
+    setEvents([...events, normalizeEvent(newEvent)]);
     setShowForm(false);
   };
 
-  const handleEventUpdated = (updatedEvent: CalendarEvent) => {
-    updatedEvent.start = new Date(updatedEvent.start);
-    updatedEvent.end = new Date(updatedEvent.end);
-    setEvents(events.map(e => e.id === updatedEvent.id ? updatedEvent : e));
+  const handleEventUpdated = (updatedEvent: any) => {
+    setEvents(events.map(e => e.id === updatedEvent.id ? normalizeEvent(updatedEvent) : e));
     setSelectedEvent(null);
   };
 
@@ -150,6 +157,11 @@ export default function EventPlanner() {
             style={{ height: '100%' }}
             onSelectSlot={handleSelectSlot}
             onSelectEvent={handleSelectEvent}
+            onNavigate={setCurrentDate}
+            onView={(view: any) => setCurrentView(view as 'month' | 'week' | 'day' | 'agenda')}
+            view={currentView}
+            date={currentDate}
+            views={['month', 'week', 'day', 'agenda']}
             selectable
             popup
           />
@@ -164,7 +176,7 @@ export default function EventPlanner() {
             />
           ) : selectedEvent ? (
             <EventDetail
-              event={selectedEvent}
+              event={selectedEvent as any}
               onClose={() => setSelectedEvent(null)}
               onUpdate={handleEventUpdated}
               onDelete={handleEventDeleted}

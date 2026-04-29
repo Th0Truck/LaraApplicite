@@ -1,43 +1,65 @@
-import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, Calendar, Clock } from 'lucide-react';
+import { fetchJson } from '@/lib/utils';
 
-interface CalendarEvent {
+interface EventFormEvent {
   id?: number;
   title: string;
   description?: string;
   start_date: string;
   end_date: string;
+  start_time?: string;
+  end_time?: string;
   location?: string;
   category?: string;
   is_recurring?: boolean;
   recurrence_pattern?: string;
+  start?: Date;
+  end?: Date;
 }
 
 interface EventFormProps {
-  event?: CalendarEvent | null;
+  event?: EventFormEvent | null;
   onClose: () => void;
-  onSave: (event: CalendarEvent) => void;
+  onSave: (event: any) => void;
 }
 
+const formatDate = (date: Date) => date.toISOString().slice(0, 10);
+const formatTime = (date: Date) => date.toISOString().slice(11, 16);
+const buildDateTime = (date: string, time: string) => `${date}T${time}:00`;
+
 export default function EventForm({ event, onClose, onSave }: EventFormProps) {
-  const [formData, setFormData] = useState<CalendarEvent>({
+  const startDateRef = useRef<HTMLInputElement & { showPicker?: () => void } | null>(null);
+  const endDateRef = useRef<HTMLInputElement & { showPicker?: () => void } | null>(null);
+  const startTimeRef = useRef<HTMLInputElement & { showPicker?: () => void } | null>(null);
+  const endTimeRef = useRef<HTMLInputElement & { showPicker?: () => void } | null>(null);
+
+  const [formData, setFormData] = useState<EventFormEvent>({
     title: '',
     description: '',
-    start_date: new Date().toISOString().slice(0, 16),
-    end_date: new Date(Date.now() + 3600000).toISOString().slice(0, 16),
+    start_date: formatDate(new Date()),
+    start_time: formatTime(new Date()),
+    end_date: formatDate(new Date(Date.now() + 3600000)),
+    end_time: formatTime(new Date(Date.now() + 3600000)),
     location: '',
     category: 'general',
     is_recurring: false,
     recurrence_pattern: undefined,
   });
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (event) {
+      const start = new Date(event.start_date);
+      const end = new Date(event.end_date);
+
       setFormData({
         ...event,
-        start_date: new Date(event.start_date).toISOString().slice(0, 16),
-        end_date: new Date(event.end_date).toISOString().slice(0, 16),
+        start_date: formatDate(start),
+        start_time: formatTime(start),
+        end_date: formatDate(end),
+        end_time: formatTime(end),
       });
     }
   }, [event]);
@@ -54,28 +76,28 @@ export default function EventForm({ event, onClose, onSave }: EventFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage(null);
 
     try {
       const endpoint = event?.id ? `/events/${event.id}` : '/events';
       const method = event?.id ? 'PUT' : 'POST';
 
-      const response = await fetch(endpoint, {
+      const { start_time, end_time, ...rest } = formData;
+      const payload = {
+        ...rest,
+        start_date: buildDateTime(formData.start_date, start_time ?? '00:00'),
+        end_date: buildDateTime(formData.end_date, end_time ?? '00:00'),
+      };
+
+      const savedEvent = await fetchJson(endpoint, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-        },
-        body: JSON.stringify(formData),
+        body: payload,
       });
-
-      if (!response.ok) throw new Error('Failed to save event');
-
-      const savedEvent = await response.json();
       onSave(savedEvent);
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving event:', error);
-      alert('Failed to save event');
+      setErrorMessage(error?.message || 'Failed to save event');
     } finally {
       setLoading(false);
     }
@@ -93,7 +115,12 @@ export default function EventForm({ event, onClose, onSave }: EventFormProps) {
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="p-6 space-y-4 event-form">
+        {errorMessage && (
+          <div className="rounded-md bg-red-50 border border-red-200 text-red-700 px-4 py-3">
+            {errorMessage}
+          </div>
+        )}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
           <input
@@ -119,30 +146,103 @@ export default function EventForm({ event, onClose, onSave }: EventFormProps) {
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Start Date & Time *</label>
-          <input
-            type="datetime-local"
-            name="start_date"
-            value={formData.start_date}
-            onChange={handleChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
+        <hr className="block" />
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Start Date *</label>
+            <div className="relative">
+              <input
+                type="date"
+                name="start_date"
+                value={formData.start_date}
+                onChange={handleChange}
+                ref={startDateRef}
+                required
+                className="w-full pr-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <button
+                type="button"
+                onClick={() => startDateRef.current?.showPicker?.() ?? startDateRef.current?.focus()}
+                className="absolute inset-y-0 right-2 flex items-center justify-center text-gray-500 hover:text-gray-700"
+                aria-label="Open start date picker"
+              >
+                <Calendar size={18} />
+              </button>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Start Time *</label>
+            <div className="relative">
+              <input
+                type="time"
+                name="start_time"
+                value={formData.start_time ?? ''}
+                onChange={handleChange}
+                ref={startTimeRef}
+                required
+                className="w-full pr-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <button
+                type="button"
+                onClick={() => startTimeRef.current?.showPicker?.() ?? startTimeRef.current?.focus()}
+                className="absolute inset-y-0 right-2 flex items-center justify-center text-gray-500 hover:text-gray-700"
+                aria-label="Open start time picker"
+              >
+                <Clock size={18} />
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">End Date & Time *</label>
-          <input
-            type="datetime-local"
-            name="end_date"
-            value={formData.end_date}
-            onChange={handleChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
+        <hr className="block" />
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">End Date *</label>
+            <div className="relative">
+              <input
+                type="date"
+                name="end_date"
+                value={formData.end_date}
+                onChange={handleChange}
+                ref={endDateRef}
+                required
+                className="w-full pr-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <button
+                type="button"
+                onClick={() => endDateRef.current?.showPicker?.() ?? endDateRef.current?.focus()}
+                className="absolute inset-y-0 right-2 flex items-center justify-center text-gray-500 hover:text-gray-700"
+                aria-label="Open end date picker"
+              >
+                <Calendar size={18} />
+              </button>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">End Time *</label>
+            <div className="relative">
+              <input
+                type="time"
+                name="end_time"
+                value={formData.end_time ?? ''}
+                onChange={handleChange}
+                ref={endTimeRef}
+                required
+                className="w-full pr-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <button
+                type="button"
+                onClick={() => endTimeRef.current?.showPicker?.() ?? endTimeRef.current?.focus()}
+                className="absolute inset-y-0 right-2 flex items-center justify-center text-gray-500 hover:text-gray-700"
+                aria-label="Open end time picker"
+              >
+                <Clock size={18} />
+              </button>
+            </div>
+          </div>
         </div>
-
+        <hr className="block" />
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
           <input

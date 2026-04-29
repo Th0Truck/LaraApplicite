@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { X, UserPlus, Check, Clock, XCircle } from 'lucide-react';
+import { fetchJson } from '@/lib/utils';
 
 interface User {
   id: number;
@@ -7,8 +8,14 @@ interface User {
   email: string;
 }
 
-interface Attendee extends User {
-  status?: 'attending' | 'maybe' | 'declined';
+interface Attendee {
+  id: number;
+  user_id: number;
+  status: 'attending' | 'maybe' | 'declined';
+  user: {
+    name: string;
+    email: string;
+  };
 }
 
 interface InviteAttendeesProps {
@@ -60,18 +67,14 @@ export default function InviteAttendees({
     try {
       const invitations = await Promise.all(
         selectedUsers.map(userId =>
-          fetch('/event-attendees', {
+          fetchJson('/event-attendees', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-            },
-            body: JSON.stringify({
+            body: {
               event_id: eventId,
               user_id: userId,
               status: 'maybe',
-            }),
-          }).then(res => res.json())
+            },
+          })
         )
       );
 
@@ -127,13 +130,13 @@ export default function InviteAttendees({
                 {currentAttendees.map(attendee => (
                   <div key={attendee.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">{attendee.name}</p>
-                      <p className="text-xs text-gray-500">{attendee.email}</p>
+                      <p className="text-sm font-medium text-gray-900">{attendee.user.name}</p>
+                      <p className="text-xs text-gray-500">{attendee.user.email}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       {getStatusIcon(attendee.status)}
                       <span className="text-xs text-gray-600">
-                        {attendee.status || 'invited'}
+                        {attendee.status}
                       </span>
                     </div>
                   </div>
