@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Page;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class PublicPageController extends Controller

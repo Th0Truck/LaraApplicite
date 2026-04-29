@@ -3,8 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Page;
-use App\Models\Paragraph;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class PageSeeder extends Seeder

@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::policy(Event::class, EventPolicy::class);
-        
+
         $this->configureDefaults();
     }
 

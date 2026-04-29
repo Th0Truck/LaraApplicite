@@ -15,7 +15,7 @@ class ICalService
         $end = $event->end_date->format('Ymd\THis');
         $created = $event->created_at->format('Ymd\THis');
         $modified = $event->updated_at->format('Ymd\THis');
-        $uid = md5($event->id . $event->title);
+        $uid = md5($event->id.$event->title);
 
         $attendees = '';
         foreach ($event->attendees as $attendee) {
@@ -32,7 +32,7 @@ class ICalService
         $ical .= "DTSTART:{$start}\r\n";
         $ical .= "DTEND:{$end}\r\n";
         $ical .= "SUMMARY:{$event->title}\r\n";
-        
+
         if ($event->description) {
             $description = preg_replace('/[\r\n]+/', '\n ', $event->description);
             $ical .= "DESCRIPTION:{$description}\r\n";
@@ -43,7 +43,7 @@ class ICalService
         }
 
         $ical .= "ORGANIZER;CN={$event->user->name}:mailto:{$event->user->email}\r\n";
-        
+
         if ($attendees) {
             $ical .= $attendees;
         }
@@ -74,7 +74,7 @@ class ICalService
             $end = $event->end_date->format('Ymd\THis');
             $created = $event->created_at->format('Ymd\THis');
             $modified = $event->updated_at->format('Ymd\THis');
-            $uid = md5($event->id . $event->title);
+            $uid = md5($event->id.$event->title);
 
             $ical .= "BEGIN:VEVENT\r\n";
             $ical .= "UID:{$uid}\r\n";
@@ -82,7 +82,7 @@ class ICalService
             $ical .= "DTSTART:{$start}\r\n";
             $ical .= "DTEND:{$end}\r\n";
             $ical .= "SUMMARY:{$event->title}\r\n";
-            
+
             if ($event->description) {
                 $description = preg_replace('/[\r\n]+/', '\n ', $event->description);
                 $ical .= "DESCRIPTION:{$description}\r\n";
@@ -110,7 +110,7 @@ class ICalService
      */
     private static function mapStatus(string $status): string
     {
-        return match($status) {
+        return match ($status) {
             'attending' => 'ACCEPTED',
             'maybe' => 'TENTATIVE',
             'declined' => 'DECLINED',

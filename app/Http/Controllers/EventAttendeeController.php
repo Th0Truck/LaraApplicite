@@ -30,7 +30,7 @@ class EventAttendeeController extends Controller
         // Send invitation email to the user
         $user = User::find($validated['user_id']);
         $event = Event::find($validated['event_id']);
-        
+
         if ($user && $event) {
             Mail::queue(new EventInvitationMail($event, $user->name));
         }

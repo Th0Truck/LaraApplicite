@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\CommentController;
-use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventAttendeeController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ParagraphController;
 use App\Http\Controllers\PublicPageController;
@@ -45,11 +45,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('events/{event}', [EventController::class, 'show'])->name('events.show');
     Route::put('events/{event}', [EventController::class, 'update'])->name('events.update');
     Route::delete('events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
-    
+
     // iCal export routes
     Route::get('events/{event}/export', [EventController::class, 'exportEvent'])->name('events.export');
     Route::get('events/export/all', [EventController::class, 'exportAllEvents'])->name('events.export-all');
-    
+
     Route::post('event-attendees', [EventAttendeeController::class, 'store'])->name('event-attendees.store');
     Route::put('event-attendees/{eventAttendee}', [EventAttendeeController::class, 'update'])->name('event-attendees.update');
     Route::delete('event-attendees/{eventAttendee}', [EventAttendeeController::class, 'destroy'])->name('event-attendees.destroy');

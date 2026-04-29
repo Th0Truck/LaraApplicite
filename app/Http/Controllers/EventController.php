@@ -16,7 +16,7 @@ class EventController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        
+
         $events = Event::where('user_id', $user->id)
             ->orWhereHas('attendees', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
@@ -127,7 +127,7 @@ class EventController extends Controller
     public function exportAllEvents()
     {
         $user = auth()->user();
-        
+
         $events = Event::where('user_id', $user->id)
             ->orWhereHas('attendees', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
