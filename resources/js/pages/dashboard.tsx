@@ -1,6 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import { Button } from '@/components/ui/button';
+import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import { index as pagesIndex } from '@/routes/pages';

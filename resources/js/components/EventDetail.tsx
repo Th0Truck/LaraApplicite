@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import { Edit2, Trash2, MapPin, Clock, UserPlus, Download } from 'lucide-react';
 import { format } from 'date-fns';
-import { fetchJson } from '@/lib/utils';
-import InviteAttendees from '@/components/InviteAttendees';
+import { Edit2, Trash2, MapPin, Clock, UserPlus, Download } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import AttendeeRSVP from '@/components/AttendeeRSVP';
+import InviteAttendees from '@/components/InviteAttendees';
+import { fetchJson } from '@/lib/utils';
 
 interface EventAttendee {
   id: number;

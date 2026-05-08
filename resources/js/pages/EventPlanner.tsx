@@ -1,12 +1,14 @@
-import { useEffect, useState, useMemo } from 'react';
-import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
+import { Head } from '@inertiajs/react';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { enUS } from 'date-fns/locale';
+import { useEffect, useState, useMemo } from 'react';
+import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { fetchJson } from '@/lib/utils';
-import EventForm from '@/components/EventForm';
 import EventDetail from '@/components/EventDetail';
+import EventForm from '@/components/EventForm';
 import SearchFilter from '@/components/SearchFilter';
+import TopBar from '@/components/top-bar';
+import { fetchJson } from '@/lib/utils';
 
 const locales = {
   'en-US': enUS,
@@ -120,7 +122,10 @@ export default function EventPlanner() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex min-h-screen flex-col bg-gray-50">
+      <Head title="Calendar" />
+      <TopBar title="Calendar" />
+
       <div className="bg-white border-b border-gray-200 p-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-900">Event Planner</h1>
