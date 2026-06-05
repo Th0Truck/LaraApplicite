@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Page;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -42,6 +43,10 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'pages' => Page::whereNotNull('published_at')
+                ->orderBy('created_at')
+                ->get(['title', 'slug'])
+                ->toArray(),
         ];
     }
 }

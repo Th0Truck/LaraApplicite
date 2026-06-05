@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
 import { X, Calendar, Clock } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { fetchJson } from '@/lib/utils';
 import { store, update } from '@/routes/events';
 

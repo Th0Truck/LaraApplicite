@@ -3,6 +3,7 @@
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\EventAttendeeController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ParagraphController;
 use App\Http\Controllers\PublicPageController;
@@ -20,6 +21,14 @@ Route::get('/', function () {
 Route::get('dashboard', function () {
     return Inertia::render('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('gallery', [GalleryController::class, 'publicIndex'])->name('gallery.public');
+
+Route::resource('dashboard/gallery', GalleryController::class)
+    ->parameters(['gallery' => 'gallery'])
+    ->names('gallery')
+    ->except(['show'])
+    ->middleware(['auth', 'verified']);
 
 Route::resource('pages', PageController::class)->middleware('auth');
 

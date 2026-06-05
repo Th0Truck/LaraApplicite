@@ -13,7 +13,7 @@ class PageController extends Controller
      */
     public function index()
     {
-        $pages = Page::all();
+        $pages = Page::orderBy('created_at')->get();
 
         return Inertia::render('pages/index', [
             'pages' => $pages,

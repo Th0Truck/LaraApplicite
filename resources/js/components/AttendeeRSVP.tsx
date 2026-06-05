@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { Check, Clock, XCircle } from 'lucide-react';
+import { useState } from 'react';
 import { fetchJson } from '@/lib/utils';
 
 interface Attendee {
