@@ -20,6 +20,7 @@ export default function TopBar({
     brand,
     navItems = [
         { href: '/', label: 'Home' },
+        { href: '/gallery', label: 'Gallery' },
         { href: '/calendar', label: 'Calendar' },
     ],
 }: TopBarProps) {

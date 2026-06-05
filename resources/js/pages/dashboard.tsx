@@ -31,10 +31,15 @@ export default function Dashboard() {
                 </div>
                 <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border p-6">
                     <h2 className="text-2xl font-bold mb-4">CMS Management</h2>
-                    <p className="text-muted-foreground mb-6">Manage your pages and content.</p>
-                    <Button asChild>
-                        <Link href={pagesIndex().url}>Manage Pages</Link>
-                    </Button>
+                    <p className="text-muted-foreground mb-6">Manage your pages, gallery, and content.</p>
+                    <div className="flex flex-wrap gap-3">
+                        <Button asChild>
+                            <Link href={pagesIndex().url}>Manage Pages</Link>
+                        </Button>
+                        <Button variant="outline" asChild>
+                            <Link href="/dashboard/gallery">Manage Gallery</Link>
+                        </Button>
+                    </div>
                 </div>
             </div>
         </AppLayout>

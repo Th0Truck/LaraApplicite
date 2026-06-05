@@ -16,6 +16,7 @@ export default function Welcome() {
                 brand={<span className="text-xl font-bold text-gray-900 dark:text-white">Applicite</span>}
                 navItems={[
                     { href: '/', label: 'Home' },
+                    { href: '/gallery', label: 'Gallery' },
                     { href: '/calendar', label: 'Calendar' },
                 ]}
             >
